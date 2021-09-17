@@ -29,7 +29,6 @@ jobs:
     name: Build and Deploy Stage
     runs-on: ubuntu-latest
     environment: Stage
-    url: https://tonkotsu-stage.azurewebsites.net/
     env:
       AZURE_WEBAPP_NAME: Tonkotsu
       AZURE_WEBAPP_PACKAGE_PATH: ./
@@ -58,7 +57,6 @@ jobs:
     name: Build and Deploy Prod
     runs-on: ubuntu-latest
     environment: Prod
-    url: https://tonkotsu.azurewebsites.net/
     needs: build-and-deploy-stage
     env:
       AZURE_WEBAPP_NAME: Tonkotsu
