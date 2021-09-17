@@ -25,10 +25,11 @@ env:
   NODE_VERSION: '10.x'                # set this to the node version to use
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy
+  build-and-deploy-stage:
+    name: Build and Deploy Stage
     runs-on: ubuntu-latest
     environment: Stage
+    url: https://tonkotsu-stage.azurewebsites.net/
     env:
       AZURE_WEBAPP_NAME: Tonkotsu
       AZURE_WEBAPP_PACKAGE_PATH: ./
@@ -52,3 +53,32 @@ jobs:
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
         slot-name: Stage
+
+  build-and-deploy-prod:
+    name: Build and Deploy Prod
+    runs-on: ubuntu-latest
+    environment: Prod
+    url: https://tonkotsu.azurewebsites.net/
+    needs: build-and-deploy-stage
+    env:
+      AZURE_WEBAPP_NAME: Tonkotsu
+      AZURE_WEBAPP_PACKAGE_PATH: ./
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    - name: npm install, build, and test
+      run: |
+        # Build and test the project, then
+        # deploy to Azure Web App.
+        npm install
+        npm run build --if-present
+        npm run test --if-present
+    - name: 'Deploy to Azure WebApp'
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
